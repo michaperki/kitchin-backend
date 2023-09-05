@@ -27,6 +27,13 @@ def register():
         username = request.form['username']
         password = request.form['password']
         
+        # Print all the users
+        print("DEBUGGING")
+        users = User.query.all()
+        for user in users:
+            print(user.username)
+        
+        
         # Check if the username already exists in the database.
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
