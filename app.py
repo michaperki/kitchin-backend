@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -24,25 +24,29 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        data = request.get_json()  # Get JSON data from the request body
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return jsonify({"error": "Username and password are required."}), 400
 
         # Check if the username already exists in the database.
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            return "Username already exists. Please choose another username."
+            return jsonify({"error": "Username already exists. Please choose another username."}), 400
         
         # Create a new user and add it to the database.
         new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
         
-        return "Registration successful!"
-    
-    return render_template('register.html')  # You can create an HTML template for the registration form.
+        return jsonify({"message": "Registration successful!"}), 201
+
+    return jsonify({"error": "Invalid request method."}), 405
 
 
 if __name__ == '__main__':
