@@ -29,18 +29,18 @@ def register():
     if request.method == 'POST':
         data = request.get_json()  # Get JSON data from the request body
         username = data.get('username')
-        email = data.get('email')
         password = data.get('password')
 
-        if not username or not password or not email:
-            return jsonify({"error": "Username, password, and email are required."}), 400
+        if not username or not password:
+            return jsonify({"error": "Username and password are required."}), 400
+
         # Check if the username already exists in the database.
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             return jsonify({"error": "Username already exists. Please choose another username."}), 400
         
         # Create a new user and add it to the database.
-        new_user = User(username=username, email=email, password=password)
+        new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
         
