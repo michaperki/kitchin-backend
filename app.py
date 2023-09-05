@@ -1,11 +1,12 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-import os
-from python-dotenv import load_dotenv
-load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')  # Heroku PostgreSQL URL
+
+# Use the 'SQLALCHEMY_DATABASE_URI' environment variable directly
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+
 db = SQLAlchemy(app)
 
 # Use the PORT environment variable provided by Heroku
