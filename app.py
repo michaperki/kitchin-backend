@@ -2,7 +2,9 @@ import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from models import User  # Import your User model from models.py
 
 app = Flask(__name__)
 CORS(app)
@@ -26,27 +28,47 @@ class User(db.Model):
 
 @app.route('/register', methods=['POST'])
 def register():
-    if request.method == 'POST':
-        data = request.get_json()  # Get JSON data from the request body
-        username = data.get('username')
-        password = data.get('password')
+    data = request.get_json()  # Get JSON data from the request body
+    username = data.get('username')
+    password = data.get('password')
 
-        if not username or not password:
-            return jsonify({"error": "Username and password are required."}), 400
+    if not username or not password:
+        return jsonify({"error": "Username and password are required."}), 400
 
-        # Check if the username already exists in the database.
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            return jsonify({"error": "Username already exists. Please choose another username."}), 400
-        
-        # Create a new user and add it to the database.
-        new_user = User(username=username, password=password)
-        db.session.add(new_user)
-        db.session.commit()
-        
-        return jsonify({"message": "Registration successful!"}), 201
+    # Check if the username already exists in the database.
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        return jsonify({"error": "Username already exists. Please choose another username."}), 400
+    
+    # Create a new user and add it to the database.
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    
+    return jsonify({"message": "Registration successful!"}), 201
 
-    return jsonify({"error": "Invalid request method."}), 405
+# Login route
+@app.route('/login', methods=['POST'])
+def login():
+    # Get username and password from the request JSON data
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    # Check if username and password are provided
+    if not username or not password:
+        return jsonify({'message': 'Username and password are required'}), 400
+
+    # Query the database to find the user by username
+    user = User.query.filter_by(username=username).first()
+
+    # Check if the user exists and the password is correct
+    if user and bcrypt.check_password_hash(user.password, password):
+        # You can create an authentication token or session here if needed
+        # For simplicity, we'll just return a success message for now
+        return jsonify({'message': 'Login successful'}), 200
+    else:
+        return jsonify({'message': 'Invalid username or password'}), 401
 
 
 if __name__ == '__main__':
