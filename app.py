@@ -1,7 +1,11 @@
-import os
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with your own secret key
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')  # Heroku PostgreSQL URL
+db = SQLAlchemy(app)
 
 # Use the PORT environment variable provided by Heroku
 port = int(os.environ.get("PORT", 5000))
