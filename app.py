@@ -6,7 +6,6 @@ from flask_migrate import Migrate
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
 db = SQLAlchemy(app)
-db.init_app(app)
 migrate = Migrate(app, db)
 
 # Use the PORT environment variable provided by Heroku
